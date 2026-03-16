@@ -1,4 +1,8 @@
 # Taller Individual: Node.js
+## Author: Profe LEONARDO BUSTAMANTE
+## Motivo: Guía de estudio
+## Medio: Teams
+
 
 ## Descripción
 
@@ -71,7 +75,9 @@ Se evaluará lo siguiente:
 
 La entrega del taller se realizará a través de [Github Classroom](https://classroom.github.com/). 
 
-### Restricciones
+
+
+
 
 - **No está permitido el uso de GitHub Copilot ni de cualquier otra herramienta de inteligencia artificial generativa** para completar este taller.
 - Puedes utilizar tus propios repositorios y recursos disponibles en internet, siempre y cuando cites las fuentes utilizadas.
