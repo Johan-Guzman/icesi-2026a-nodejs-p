@@ -1,19 +1,19 @@
-# 📚 README — Guía de Referencia: Node.js + TypeScript + Express + MongoDB
+# README — Guia de Referencia: Node.js + TypeScript + Express + MongoDB
 
-
+> **Proposito:** Esta guia cubre los patrones mas comunes en parciales de Node.js. Usala como referencia rapida durante el examen. Esta organizada por temas, de lo mas frecuente a lo mas especifico.
 
 ---
 
 ## Tabla de contenido
 
-1. [Arquitectura típica del proyecto](#1-arquitectura-típica-del-proyecto)
+1. [Arquitectura tipica del proyecto](#1-arquitectura-tipica-del-proyecto)
 2. [Modelos con Mongoose](#2-modelos-con-mongoose)
-3. [Services — lógica de negocio](#3-services--lógica-de-negocio)
+3. [Services — logica de negocio](#3-services--logica-de-negocio)
 4. [Controllers — manejo de requests](#4-controllers--manejo-de-requests)
 5. [Rutas con Express](#5-rutas-con-express)
-6. [Middleware de autenticación JWT](#6-middleware-de-autenticación-jwt)
-7. [Validación de entradas](#7-validación-de-entradas)
-8. [Conexión a MongoDB](#8-conexión-a-mongodb)
+6. [Middleware de autenticacion JWT](#6-middleware-de-autenticacion-jwt)
+7. [Validacion de entradas](#7-validacion-de-entradas)
+8. [Conexion a MongoDB](#8-conexion-a-mongodb)
 9. [Punto de entrada — index.ts](#9-punto-de-entrada--indexts)
 10. [Errores comunes a detectar](#10-errores-comunes-a-detectar)
 11. [Tests con Jest — Cheatsheet](#11-tests-con-jest--cheatsheet)
@@ -21,12 +21,12 @@
 
 ---
 
-## 1. Arquitectura típica del proyecto
+## 1. Arquitectura tipica del proyecto
 
 ```
 src/
 ├── config/
-│   └── db.ts              → Conexión a MongoDB (mongoose.connect)
+│   └── db.ts              → Conexion a MongoDB (mongoose.connect)
 ├── controllers/
 │   └── entidad.controller.ts  → Recibe req/res, llama al service
 ├── middlewares/
@@ -36,9 +36,9 @@ src/
 ├── routes/
 │   └── index.ts           → Define todas las rutas y sus middlewares
 ├── schemas/
-│   └── entidad.schema.ts  → Validación de campos de entrada
+│   └── entidad.schema.ts  → Validacion de campos de entrada
 ├── services/
-│   └── entidad.service.ts → Lógica de negocio, accede al modelo
+│   └── entidad.service.ts → Logica de negocio, accede al modelo
 └── index.ts               → App Express, un solo app.listen()
 
 test/
@@ -48,9 +48,9 @@ test/
     └── entidad.controller.test.ts → Mockean el service, prueban el controller
 ```
 
-**Flujo de una petición:**
+**Flujo de una peticion:**
 ```
-Cliente → Ruta → [Middleware auth] → [Middleware validación] → Controller → Service → Modelo → MongoDB
+Cliente → Ruta → [Middleware auth] → [Middleware validacion] → Controller → Service → Modelo → MongoDB
 ```
 
 ---
@@ -60,7 +60,7 @@ Cliente → Ruta → [Middleware auth] → [Middleware validación] → Controll
 ```typescript
 import mongoose, { Types } from 'mongoose';
 
-// 1. Interface de entrada (campos que envía el cliente)
+// 1. Interface de entrada (campos que envia el cliente)
 export interface EntidadInput {
   nombre: string;
   email: string;
@@ -81,8 +81,8 @@ const entidadSchema = new mongoose.Schema({
   activo:       { type: Boolean, required: true, default: true },
   referenciaId: { type: mongoose.Schema.Types.ObjectId, ref: 'OtroModelo', required: false }
 }, {
-  timestamps: true,       // agrega createdAt y updatedAt automáticamente
-  collection: 'entidades' // nombre exacto de la colección en MongoDB
+  timestamps: true,       // agrega createdAt y updatedAt automaticamente
+  collection: 'entidades' // nombre exacto de la coleccion en MongoDB
 });
 
 // 4. Exportar el modelo
@@ -90,22 +90,22 @@ const Entidad = mongoose.model<EntidadDocument>('Entidad', entidadSchema);
 export default Entidad;
 ```
 
-**Tipos de campo más usados:**
+**Tipos de campo mas usados:**
 
-| Tipo          | Mongoose                          | Notas                          |
-|---------------|-----------------------------------|--------------------------------|
-| Texto         | `type: String`                    |                                |
-| Número        | `type: Number`                    |                                |
-| Booleano      | `type: Boolean, default: false`   |                                |
-| Fecha         | `type: Date, default: Date.now`   |                                |
-| Referencia    | `type: Schema.Types.ObjectId, ref: 'Modelo'` | Para populate       |
-| Arreglo       | `type: [String]`                  | O `[{ type: ObjectId }]`      |
+| Tipo          | Mongoose                                     | Notas                    |
+|---------------|----------------------------------------------|--------------------------|
+| Texto         | `type: String`                               |                          |
+| Numero        | `type: Number`                               |                          |
+| Booleano      | `type: Boolean, default: false`              |                          |
+| Fecha         | `type: Date, default: Date.now`              |                          |
+| Referencia    | `type: Schema.Types.ObjectId, ref: 'Modelo'` | Para populate            |
+| Arreglo       | `type: [String]`                             | O `[{ type: ObjectId }]` |
 
 ---
 
-## 3. Services — lógica de negocio
+## 3. Services — logica de negocio
 
-El service es la clase que contiene **toda** la lógica. Nunca accede directamente a `req`/`res`.
+El service es la clase que contiene **toda** la logica. Nunca accede directamente a `req`/`res`.
 
 ```typescript
 import EntidadModel, { EntidadInput, EntidadDocument } from '../models/entidad';
@@ -139,7 +139,7 @@ class EntidadService {
     }
   }
 
-  // Buscar por campo de texto (insensible a mayúsculas)
+  // Buscar por campo de texto (insensible a mayusculas)
   async findByName(nombre: string): Promise<EntidadDocument[]> {
     try {
       return await EntidadModel.find({
@@ -165,7 +165,7 @@ class EntidadService {
       return await EntidadModel.findOneAndUpdate(
         { _id: id },
         input,
-        { new: true }          // ← devuelve el doc después del update
+        { new: true }          // devuelve el doc despues del update
         // { returnOriginal: false } es equivalente en versiones antiguas
       );
     } catch (error) {
@@ -173,7 +173,7 @@ class EntidadService {
     }
   }
 
-  // Eliminar (devuelve true/false según si encontró el doc)
+  // Eliminar (devuelve true/false segun si encontro el doc)
   async remove(id: string): Promise<boolean> {
     try {
       const result = await EntidadModel.findOneAndDelete({ _id: id });
@@ -276,18 +276,18 @@ class EntidadController {
 export default new EntidadController();
 ```
 
-**Códigos de respuesta HTTP más usados:**
+**Codigos de respuesta HTTP mas usados:**
 
-| Código | Significado              | Cuándo usarlo                           |
-|--------|--------------------------|-----------------------------------------|
-| 200    | OK                       | GET, PUT exitosos                       |
-| 201    | Created                  | POST exitoso                            |
-| 204    | No Content               | DELETE exitoso (sin body)               |
-| 400    | Bad Request              | Validación fallida, datos inválidos     |
-| 401    | Unauthorized             | Sin token o token inválido              |
-| 403    | Forbidden                | Sin permisos                            |
-| 404    | Not Found                | Recurso no existe                       |
-| 500    | Internal Server Error    | Error inesperado del servidor           |
+| Codigo | Significado           | Cuando usarlo                       |
+|--------|-----------------------|-------------------------------------|
+| 200    | OK                    | GET, PUT exitosos                   |
+| 201    | Created               | POST exitoso                        |
+| 204    | No Content            | DELETE exitoso (sin body)           |
+| 400    | Bad Request           | Validacion fallida, datos invalidos |
+| 401    | Unauthorized          | Sin token o token invalido          |
+| 403    | Forbidden             | Sin permisos                        |
+| 404    | Not Found             | Recurso no existe                   |
+| 500    | Internal Server Error | Error inesperado del servidor       |
 
 ---
 
@@ -301,30 +301,29 @@ import { validateEntidadSchema } from '../schemas/entidad.schema';
 
 const routes = (app: Express) => {
 
-  // Rutas públicas (sin auth)
+  // Rutas publicas (sin auth)
   app.post('/login', authController.login);
   app.post('/entidades', validateEntidadSchema, entidadController.create);
 
   // Rutas protegidas (con auth)
-  app.get('/entidades',          auth, entidadController.getAll);
-  app.get('/entidades/:id',      auth, entidadController.getOne);
-  app.put('/entidades/:id',      auth, entidadController.update);
-  app.delete('/entidades/:id',   auth, entidadController.remove);
+  app.get('/entidades',        auth, entidadController.getAll);
+  app.get('/entidades/:id',    auth, entidadController.getOne);
+  app.put('/entidades/:id',    auth, entidadController.update);
+  app.delete('/entidades/:id', auth, entidadController.remove);
 
-  // Rutas con parámetro especial
-  // ⚠️ IMPORTANTE: rutas específicas ANTES de rutas genéricas con :id
-  app.get('/entidades/activos',      auth, entidadController.getActivos);  // ← primero
-  app.get('/entidades/:id',          auth, entidadController.getOne);       // ← después
+  // IMPORTANTE: rutas especificas ANTES de rutas genericas con :id
+  app.get('/entidades/activos', auth, entidadController.getActivos); // primero
+  app.get('/entidades/:id',     auth, entidadController.getOne);     // despues
 };
 
 export default routes;
 ```
 
-> **Regla crítica de orden:** Si tienes `/entidades/activos` y `/entidades/:id`, la ruta estática (`/activos`) DEBE ir antes. Si `:id` va primero, Express interpretará `activos` como un ID.
+> **Regla critica de orden:** Si tienes `/entidades/activos` y `/entidades/:id`, la ruta estatica (`/activos`) DEBE ir antes. Si `:id` va primero, Express interpretara `activos` como un ID.
 
 ---
 
-## 6. Middleware de autenticación JWT
+## 6. Middleware de autenticacion JWT
 
 ```typescript
 import { Request, Response, NextFunction } from 'express';
@@ -338,12 +337,12 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    // El header viene como "Bearer <token>" → quitamos el prefijo
+    // El header viene como "Bearer <token>" — quitamos el prefijo
     token = token.replace('Bearer ', '');
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
 
-    // Adjuntamos el usuario decodificado al body o a un campo custom
+    // Adjuntamos el usuario decodificado al body
     req.body.loggedUser = decoded;
 
     next();
@@ -363,9 +362,9 @@ import jwt from 'jsonwebtoken';
 login(email: string): string {
   const secret = process.env.JWT_SECRET || 'secret';
   const token = jwt.sign(
-    { email },                  // payload (datos que queremos guardar)
+    { email },           // payload (datos que queremos guardar)
     secret,
-    { expiresIn: '1d' }         // expira en 1 día
+    { expiresIn: '1d' }  // expira en 1 dia
   );
   return token;
 }
@@ -373,9 +372,9 @@ login(email: string): string {
 
 ---
 
-## 7. Validación de entradas
+## 7. Validacion de entradas
 
-Middleware de validación manual (sin librerías externas):
+Middleware de validacion manual (sin librerias externas):
 
 ```typescript
 import { Request, Response, NextFunction } from 'express';
@@ -396,17 +395,17 @@ export const validateEntidadSchema = (
   // Validar email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email || !emailRegex.test(email)) {
-    errors.push("El campo 'email' es requerido y debe ser un email válido.");
+    errors.push("El campo 'email' es requerido y debe ser un email valido.");
   }
 
-  // Validar password (mínimo 8 caracteres)
+  // Validar password (minimo 8 caracteres)
   if (!password || typeof password !== 'string' || password.length < 8) {
     errors.push("El campo 'password' debe tener al menos 8 caracteres.");
   }
 
   if (errors.length > 0) {
     res.status(400).json({ errors });
-    return; // ← importante: no llamar a next() si hay errores
+    return; // importante: no llamar a next() si hay errores
   }
 
   next();
@@ -415,7 +414,7 @@ export const validateEntidadSchema = (
 
 ---
 
-## 8. Conexión a MongoDB
+## 8. Conexion a MongoDB
 
 ```typescript
 import mongoose from 'mongoose';
@@ -455,106 +454,113 @@ routes(app);
 
 const port = process.env.PORT || 3000;
 
-// ✅ UN SOLO app.listen, dentro del .then() de la BD
+// UN SOLO app.listen, dentro del .then() de la BD
 db.then(() => {
   app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
   });
 });
 
-export default app; // necesario para los tests de integración con supertest
+export default app; // necesario para los tests de integracion con supertest
 ```
 
-> **Error más común:** Llamar `app.listen()` dos veces (una directamente y otra en el `.then()` de la BD). Causa error `EADDRINUSE` — el puerto ya está en uso.
+> **Error mas comun:** Llamar `app.listen()` dos veces (una directamente y otra en el `.then()` de la BD). Causa error `EADDRINUSE` — el puerto ya esta en uso.
 
 ---
 
 ## 10. Errores comunes a detectar
 
-Esta sección cubre los bugs típicos que se inyectan en los parciales.
+Esta seccion cubre los bugs tipicos que se inyectan en los parciales.
 
 ### Error 1 — Doble `app.listen()`
-```typescript
-// ❌ MAL: dos llamadas a listen
-app.listen(3000, () => console.log('corriendo'));  // primera vez
-db.then(() => app.listen(3000, () => console.log('ok'))); // segunda vez → CRASH
 
-// ✅ BIEN: solo una llamada, dentro del then
+```typescript
+// MAL: dos llamadas a listen
+app.listen(3000, () => console.log('corriendo'));          // primera vez
+db.then(() => app.listen(3000, () => console.log('ok'))); // segunda vez — CRASH
+
+// BIEN: solo una llamada, dentro del then
 db.then(() => app.listen(3000, () => console.log('ok')));
 ```
 
 ### Error 2 — Orden incorrecto: hashear antes de verificar existencia
+
 ```typescript
-// ❌ MAL: hashea aunque el usuario ya exista (ineficiente y contamina req.body)
+// MAL: hashea aunque el usuario ya exista (ineficiente y contamina req.body)
 const existe = await userService.findByEmail(req.body.email);
-req.body.password = await bcrypt.hash(req.body.password, 10); // ← hash innecesario
+req.body.password = await bcrypt.hash(req.body.password, 10); // hash innecesario
 if (existe) return res.status(400).json({ message: 'Ya existe' });
 
-// ✅ BIEN: verificar primero, hashear solo si es necesario
+// BIEN: verificar primero, hashear solo si es necesario
 const existe = await userService.findByEmail(req.body.email);
 if (existe) return res.status(400).json({ message: 'Ya existe' });
-req.body.password = await bcrypt.hash(req.body.password, 10); // ← solo si no existe
+req.body.password = await bcrypt.hash(req.body.password, 10); // solo si no existe
 ```
 
-### Error 3 — Service con clase vacía
+### Error 3 — Service con clase vacia
+
 ```typescript
-// ❌ MAL: clase sin métodos → todos los controllers fallan en runtime
+// MAL: clase sin metodos — todos los controllers fallan en runtime
 class EntidadService {}
 export default new EntidadService();
 
-// ✅ BIEN: implementar todos los métodos que usa el controller
+// BIEN: implementar todos los metodos que usa el controller
 class EntidadService {
   async getAll() { return await EntidadModel.find(); }
-  // ...resto de métodos
+  // ...resto de metodos
 }
 ```
 
-### Error 4 — Controller sin método que la ruta referencia
+### Error 4 — Controller sin metodo que la ruta referencia
+
 ```typescript
 // routes/index.ts
-app.post('/entidades', auth, entidadController.create); // ← llama a .create
+app.post('/entidades', auth, entidadController.create); // llama a .create
 
 // controllers/entidad.controller.ts
 class EntidadController {
-  // ❌ MAL: no existe el método create → TypeError en runtime
+  // MAL: no existe el metodo create — TypeError en runtime
   async getAll() { ... }
 }
 
-// ✅ BIEN: agregar el método faltante
+// BIEN: agregar el metodo faltante
 class EntidadController {
-  async create(req: Request, res: Response) { ... } // ← agregar
+  async create(req: Request, res: Response) { ... } // agregar
   async getAll(req: Request, res: Response) { ... }
 }
 ```
 
 ### Error 5 — Imports innecesarios o incorrectos
+
 ```typescript
-// ❌ MAL: imports que no se usan → warnings de TypeScript
-import { error } from 'console';  // nunca se usa
+// MAL: imports que no se usan — warnings de TypeScript
+import { error } from 'console';     // nunca se usa
 import { Timestamp } from 'mongodb'; // no se usa
 
-// ✅ BIEN: solo importar lo que se necesita
+// BIEN: solo importar lo que se necesita
 import { Request, Response, NextFunction } from 'express';
 ```
 
 ### Error 6 — findOneAndUpdate sin `{ new: true }`
+
 ```typescript
-// ❌ MAL: devuelve el documento ANTES del update
+// MAL: devuelve el documento ANTES del update
 const updated = await Model.findOneAndUpdate({ _id: id }, data);
 
-// ✅ BIEN: devuelve el documento DESPUÉS del update
+// BIEN: devuelve el documento DESPUES del update
 const updated = await Model.findOneAndUpdate({ _id: id }, data, { new: true });
 ```
 
-### Error 7 — Ruta genérica antes de ruta específica
-```typescript
-// ❌ MAL: Express interpreta "vendidos" como un :id
-app.get('/libros/:id',      controller.getOne);    // atrapa todo
-app.get('/libros/vendidos', controller.getSold);   // nunca se alcanza
+### Error 7 — Ruta generica antes de ruta especifica
 
-// ✅ BIEN: específica primero
-app.get('/libros/vendidos', controller.getSold);   // primero
-app.get('/libros/:id',      controller.getOne);    // después
+```typescript
+// MAL: Express interpreta "vendidos" como un :id
+app.get('/libros/:id',      controller.getOne);  // atrapa todo
+app.get('/libros/vendidos', controller.getSold); // nunca se alcanza
+
+// BIEN: especifica primero
+app.get('/libros/vendidos', controller.getSold); // primero
+app.get('/libros/:id',      controller.getOne);  // despues
 ```
 
 ---
@@ -567,7 +573,7 @@ app.get('/libros/:id',      controller.getOne);    // después
 import entidadService from '../../src/services/entidad.service';
 import EntidadModel from '../../src/models/entidad';
 
-jest.mock('../../src/models/entidad'); // ← mockea todo el modelo
+jest.mock('../../src/models/entidad'); // mockea todo el modelo
 
 describe('EntidadService', () => {
   afterEach(() => jest.clearAllMocks()); // limpia mocks entre tests
@@ -576,7 +582,7 @@ describe('EntidadService', () => {
     // 1. Preparar el mock
     (EntidadModel.find as jest.Mock).mockResolvedValue([{ nombre: 'Test' }]);
 
-    // 2. Llamar al método
+    // 2. Llamar al metodo
     const result = await entidadService.getAll();
 
     // 3. Verificar
@@ -587,14 +593,14 @@ describe('EntidadService', () => {
 });
 ```
 
-### Estructura de un test de integración (mockea el service)
+### Estructura de un test de integracion (mockea el service)
 
 ```typescript
 import { Request, Response } from 'express';
 import entidadController from '../../src/controllers/entidad.controller';
 import entidadService from '../../src/services/entidad.service';
 
-jest.mock('../../src/services/entidad.service'); // ← mockea el service
+jest.mock('../../src/services/entidad.service'); // mockea el service
 
 // Helper para crear un Response falso
 const mockResponse = () => {
@@ -634,22 +640,22 @@ describe('EntidadController', () => {
 });
 ```
 
-### Métodos de Mongoose más mockeados
+### Metodos de Mongoose mas mockeados
 
-| Llamada en el service          | Cómo mockearla en Jest                                           |
-|-------------------------------|------------------------------------------------------------------|
-| `Model.find()`                | `(Model.find as jest.Mock).mockResolvedValue([...])`             |
-| `Model.findById(id)`          | `(Model.findById as jest.Mock).mockResolvedValue({...})`         |
-| `Model.findOne({ campo })`    | `(Model.findOne as jest.Mock).mockResolvedValue({...})`          |
-| `Model.create(data)`          | `(Model.create as jest.Mock).mockResolvedValue({...})`           |
-| `Model.findOneAndUpdate()`    | `(Model.findOneAndUpdate as jest.Mock).mockResolvedValue({...})` |
-| `Model.findOneAndDelete()`    | `(Model.findOneAndDelete as jest.Mock).mockResolvedValue({...})` |
+| Llamada en el service        | Como mockearla en Jest                                           |
+|------------------------------|------------------------------------------------------------------|
+| `Model.find()`               | `(Model.find as jest.Mock).mockResolvedValue([...])`             |
+| `Model.findById(id)`         | `(Model.findById as jest.Mock).mockResolvedValue({...})`         |
+| `Model.findOne({ campo })`   | `(Model.findOne as jest.Mock).mockResolvedValue({...})`          |
+| `Model.create(data)`         | `(Model.create as jest.Mock).mockResolvedValue({...})`           |
+| `Model.findOneAndUpdate()`   | `(Model.findOneAndUpdate as jest.Mock).mockResolvedValue({...})` |
+| `Model.findOneAndDelete()`   | `(Model.findOneAndDelete as jest.Mock).mockResolvedValue({...})` |
 
-### Matchers más usados
+### Matchers mas usados
 
 ```typescript
-expect(valor).toBe('exacto');                 // igualdad estricta
-expect(valor).toEqual({ a: 1 });              // igualdad profunda (objetos)
+expect(valor).toBe('exacto');              // igualdad estricta
+expect(valor).toEqual({ a: 1 });           // igualdad profunda (objetos)
 expect(valor).toBeNull();
 expect(valor).toBeTruthy();
 expect(valor).toBeFalsy();
@@ -666,27 +672,27 @@ expect(typeof valor).toBe('string');
 
 ### Usuarios
 
-| Método | Ruta         | Auth | Body requerido                   | Respuesta exitosa |
-|--------|--------------|------|----------------------------------|-------------------|
-| POST   | /users       | No   | `{ name, email, password }`      | 201 — usuario creado |
-| POST   | /login       | No   | `{ email, password }`            | 200 — `{ token }` |
-| GET    | /users       | Sí   | —                                | 200 — lista de usuarios |
-| GET    | /users/:id   | Sí   | —                                | 200 — usuario / 404 |
-| PUT    | /users/:id   | Sí   | `{ name?, email?, password? }`   | 200 — usuario actualizado |
-| DELETE | /users/:id   | Sí   | —                                | 204 / 404 |
+| Metodo | Ruta       | Auth | Body requerido                 | Respuesta exitosa    |
+|--------|------------|------|--------------------------------|----------------------|
+| POST   | /users     | No   | `{ name, email, password }`    | 201 — usuario creado |
+| POST   | /login     | No   | `{ email, password }`          | 200 — `{ token }`    |
+| GET    | /users     | Si   | —                              | 200 — lista          |
+| GET    | /users/:id | Si   | —                              | 200 / 404            |
+| PUT    | /users/:id | Si   | `{ name?, email?, password? }` | 200 — actualizado    |
+| DELETE | /users/:id | Si   | —                              | 204 / 404            |
 
 ### Libros (ejemplo)
 
-| Método | Ruta                        | Auth | Body requerido                          | Respuesta exitosa |
-|--------|-----------------------------|------|-----------------------------------------|-------------------|
-| POST   | /books                      | Sí   | `{ title, author, price, isSold? }`     | 201 — libro creado |
-| GET    | /books                      | Sí   | —                                       | 200 — lista |
-| GET    | /books/:id                  | Sí   | —                                       | 200 / 404 |
-| GET    | /books/author/:id           | Sí   | —                                       | 200 — libros del autor |
-| PUT    | /books/:id                  | Sí   | `{ title?, author?, price? }`           | 200 / 404 |
-| DELETE | /books/:id                  | Sí   | —                                       | 204 / 404 |
-| POST   | /books/:bookId/buy/:userId  | Sí   | —                                       | 200 — mensaje / 404 |
+| Metodo | Ruta                       | Auth | Body requerido                      | Respuesta exitosa      |
+|--------|----------------------------|------|-------------------------------------|------------------------|
+| POST   | /books                     | Si   | `{ title, author, price, isSold? }` | 201 — libro creado     |
+| GET    | /books                     | Si   | —                                   | 200 — lista            |
+| GET    | /books/:id                 | Si   | —                                   | 200 / 404              |
+| GET    | /books/author/:id          | Si   | —                                   | 200 — libros del autor |
+| PUT    | /books/:id                 | Si   | `{ title?, author?, price? }`       | 200 / 404              |
+| DELETE | /books/:id                 | Si   | —                                   | 204 / 404              |
+| POST   | /books/:bookId/buy/:userId | Si   | —                                   | 200 — mensaje / 404    |
 
 ---
 
-> **Tip final:** Cuando recibas el enunciado, mapea cada funcionalidad a una sección de esta guía. Identifica primero los métodos del service (qué operaciones de BD necesitas), luego los métodos del controller (qué rutas expones), y finalmente conéctalos en las rutas.
+> **Tip final:** Cuando recibas el enunciado, mapea cada funcionalidad a una seccion de esta guia. Identifica primero los metodos del service (que operaciones de BD necesitas), luego los metodos del controller (que rutas expones), y finalmente conectalos en las rutas.
